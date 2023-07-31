@@ -1,0 +1,106 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, eval = FALSE, 
+                      message = FALSE, warning = FALSE)
+#xaringanExtra::use_clipboard()
+```
+
+```{r}
+library(tidyr)
+library(dplyr)
+```
+
+## Example 1
+These counts measure the number of TB cases in given county and year.
+```{r}
+table4a
+```
+
+- What are the variables in this data set? 
+
+- What are the cases?
+
+
+## Example 2
+
+On a sheet of paper (or in markdown), draw how `table4a` would look if it
+had the same data grouped into three columns: country, year, and cases.
+
+
+## Example 3
+High school graduation rates
+```{r}
+grad_wide<- data.frame(school=c("Aitkin","Bemidji","Chaska"), 
+                gradRate_2015=c(93.0,86.2,96.2),
+                gradRate_2014=c(94.6,83.2,92.7),
+                region=c("northern","northern","metro"))
+grad_wide
+```
+
+
+#### (a) Use `pivot_longer` to tidy this data set.
+
+
+#### (b) Rerun your  `pivot_longer` command but include arguments that removes "gradRate" from the `names_to` column and coverts it to a integer variable type. 
+
+
+#### (c) Use `separate` to divide the `gradRate_year` column into two columns named `measure` and `year`. What data type is `year` after this is done? What does adding `convert=TRUE` to the `separate command. 
+
+
+## Example 4
+
+Use `pivot_wider` to make your data set in Example 3 back into a wider version.
+
+
+
+
+
+## Example 5
+Using the `who` data set loaded through `tidyr`. This data contains counts of new tuberculosis (TB) cases broken down by year, country, age, gender, and diagnosis method from the 2014 World Health Organization Global Tuberculosis Report.
+
+```{r}
+who
+```
+
+#### (a)  Gather the 5th through 60th columns of `who` into a pair of columns named `codes` and `n`. Include `values_drop_na = TRUE` in your `pivot` command to remove cases with missing values. 
+
+#### (b) Select just the county, year, codes and n variables
+
+#### (c) WHO codes are encoded as: `new_<type of TB case>_<sex><age>` where
+  - Type of TB case
+    - `rel` - relapse
+    - `ep` - extra-pulmonary
+    - `sn` - pulmonary, smear negative 
+    - `sp` - pulmonary, smear positive
+  - Sex
+    - `m` - male 
+    - `f` - female
+  - Age
+    - `014` - 0 to 14 years old
+    - `1524` - 15 to 24 years old 
+    - `2534` - 25 to 34 years old 
+    - `3544` - 35 to 44 years old 
+    - `4554` - 45 to 54 years old 
+    - `5564` - 55 to 64 years old 
+    - `65` - 65 and older
+
+Notice that `rel` does not have a `_` separator from `new` while the other three types do have a `_` separator. There is a separate `_` between type and sex but no separator bewtween sex and age. 
+```{r}
+names(who)
+```
+
+Try the following `separate` command (with your data name used) to attempt to  divide the `codes` column into three variables called `new`, `type` and `sexage` by the underscore separator `_`. How does the `count` command tell you that your first attempt didn't work?
+```{r, eval=FALSE}
+# edit this command to work with your data
+your_data %>%
+  separate(
+    codes, 
+    into = c("new", "type", "sexage"), 
+    sep="_"
+    ) %>% 
+  count(new, type)
+```
+
+#### (d)  Now add `fill = "left"` to the command above to fill `NA`'s into columns from the left when the split by `_` doesn't contain 3 values. Verify that this does divide `sexage` and `type` correctly. 
+
+#### (e)  Separate the sexage column into sex and age columns. Use a numeric position for `sep` to indicate how to split this column (see `?separate`).  Add `convert = TRUE` to let R take its best guess at variable type. 
+

@@ -1,0 +1,100 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, eval = TRUE, 
+                      message = FALSE, warning = FALSE)
+#xaringanExtra::use_clipboard()
+```
+
+```{r packageCheck, include=FALSE, warning = FALSE}
+library(tidyverse)
+library(rpart)
+library(NHANES)
+library(partykit)
+library(caret)
+```
+
+
+### Example 1:
+Let's try to predict `diabetes` from the `NHANES` data set. We will consider predictors that are demographics (gender, race, income, age) and physical measurements (body mass index, physical activity, cholestorol and systolic blood pressure):
+```{r}
+diabetes <- NHANES %>% 
+  mutate(class = fct_relevel(Diabetes, "Yes")) %>%
+  select(class, Gender, Race1, HHIncomeMid, Age, BMI, PhysActive, TotChol, BPSysAve) %>%
+  drop_na()
+```
+
+Training/test splot:
+```{r}
+# split 80/20
+set.seed(20200707)
+n <- nrow(diabetes)
+train_index <- sample(nrow(diabetes), size=round(.8*n))  # 80% training
+diabetes_train <- diabetes %>% 
+  slice(train_index)
+diabetes_test <- diabetes %>% 
+  slice(-train_index) 
+```
+
+
+#### Question 1
+What is the overall training accuracy and error rate if you classified all cases based on the majority classification?  
+
+
+
+#### Question 2
+Using the training data, use `rpart` to fit a decision tree for diabetes (`class`) based on all other predictors in `diabetes_train`. 
+
+```{r, eval = FALSE}
+diab_rpart <- rpart(  # decision tree
+  class ~ ., 
+  data = diabetes_train)  
+diab_rpart   # output
+plot(as.party(diab_rpart), type = "simple")  #partykit viz
+```
+
+In the `rpart` output, the * nodes are terminal nodes that see less than a 1% improvement by being split any further. The values given for each node in the output are 
+
+- split criteria, 
+- number of cases in the node, 
+- number of cases in the majority class, 
+- the majority classification, 
+- proportional breakdown of the node (based on the level ordering of the response)
+
+Use the output from this tree to answer the following:
+
+- Which terminal node is largest in size? Describe the cases in this node. What are the Yes and No proportions? What is the error rate for the node?
+- Which terminal node has the largest error rate? What is the error rate and number of cases in this node? Describe the cases in this node using predictor characteristics. 
+- Use the rules given by the output to determine how you would  classify the following person: 
+
+person | gender | race | income | age | bmi | activity | chol | BP
+----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- 
+1 | male | white | 50000 | 53 | 29 | yes | 3.8 | 120
+1 | female | white | 70000 | 53 | 31 | yes | 3.8 | 120
+
+
+
+
+
+
+#### Question 3
+The default control parameter for the `rpart` splitting algorithm is 1% (`cp=0.01`). This means that a split will occur from a parent node if the overall purity of the children  (average Gini weighted by the proportion of nodes in each leaf) is at least 1% better than the parent. Do you have to *increase* or *decrease* this value to make your tree bigger (i.e. more splits)? Play around with this value to try to get your tree from question 2 to split. Here is the argument to add to the `rpart` command: `control=rpart.control(cp=.01)`. Change the 0.01 value to something higher or lower from this default setting. 
+
+
+
+#### Question 4
+What do you think the `minbucket` control argument do? Play around with integer values of this parameter:
+```{r}
+diab_rpart <- rpart(    # decision tree
+  class ~ .,            # all predictors
+  data = diabetes_train,  # training data
+  control=rpart.control(minbucket = 10) )   # what does minbucket do?
+```
+`
+
+
+#### Question 5
+Use `caret` to tune the `cp` parameter using 10-fold CV on the training data using accuracy. Does the optimal tuning solution differ much from `cp` of 0.01? (Use the `bestTune` value returne by `train` to answer this.) What is the cross-validation estimates of accuracy, sensitivity, specificity and precision for the training data?
+
+
+#### Question 6
+Use your "final model" from question 5 to classify the test data. Use 5-fold CV to estimate the accuracy, sensitivity, specificity and precision of this model on the test data and compare these values to the training data measures from question 5. 
+

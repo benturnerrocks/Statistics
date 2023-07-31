@@ -1,0 +1,44 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse = TRUE, 
+                      fig.height = 4, fig.width = 9)
+```
+
+```{r packageCheck, include=FALSE}
+library(tidyverse)
+library(shiny)
+```
+
+
+Consider the following histogram and density curve that shows the distribution of the character counts of Trump tweets:
+```{r}
+tweets<- read.csv("http://math.carleton.edu/kstclair/data/TrumpTweetData.csv")
+ggplot(tweets, aes(x = charCount)) + 
+    geom_histogram(aes(y = ..density..), bins = 50) +
+    geom_density(color = "blue", adjust = 1.5)
+```
+
+
+### 1.
+Construct the `ui` and `server` objects that render and display the histogram above. Then run `shinyApp(ui, server)` to verify that your app works (it is not yet interactive!).
+
+
+
+### 2.
+Add a `sliderInput` input object that lets the bandwidth `adjust` value of `geom_density` to range between 0.1 and 2 by increments of 0.1. 
+
+
+You can also include `options = list(height = 500)` to the `shinyApp` function to adjust the height of your app panel space (to avoid scrolling to view the slider and graph). 
+
+### 3.
+Add a `radioButtons` input object that lets the number of histogram `bins` equal 25, 50, 70, 100 or 125. 
+
+
+### 4. 
+Use `sidebarLayout` to make the input widgets on the side panel and the graph in the main panel. 
+
+
+### 5. 
+Use the `varSelectInput` input object to allow the user to choose to plot either `charCount` (character count), `nWords` (number of words), or `nRealWords` (number of "real" words which ignores words like "a" or "the", etc.)
+
+### 7. 
+Use `renderTable` and `tableOutput` to add a table with the mean and SD of the selected variable.

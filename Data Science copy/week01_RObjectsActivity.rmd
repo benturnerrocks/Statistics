@@ -1,0 +1,61 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse=TRUE, prompt=FALSE, 
+                      eval=TRUE, message=FALSE)
+```
+
+## Objects used in this handout:
+```{r}
+x <- c(8,2,1,3)
+w <- c(8L,2L,1L,3L)
+loans <- read.csv("https://math.carleton.edu/kstclair/data/CreditData.csv")
+tweets <- read.csv("https://math.carleton.edu/kstclair/data/TrumpTweetData.csv")
+x_mat2 <- cbind(x, 2*x)
+x_df <- data.frame(x=x, double_x=x*2)
+my_list <- list(myVec=x, myDf=x_df, myString=c("hi","bye"))
+```
+
+### Problem 1: data types
+
+(a) What data type is `x`?
+(b) What data type is `w`? 
+(c) What data type is `x == 1`? 
+(d) What data type is `loans$Duration.in.month`? 
+(e) What data type is `c(x,NA)`?
+
+### Problem 2: Coercion
+
+(a) What data type is `c(x, loans$Duration.in.month)`?
+(b) What data type is `c(x,"NA")`?
+(c) What does `sum(c(TRUE,FALSE,TRUE,FALSE))` equal?
+(d) What does `sum(x < 5)` equal?
+
+
+
+### Problem 3: Subsetting 
+
+(a) How can we reverse the order of entries in `x`?
+(b) What does `which(x < 5)` equal?
+(c) What does `sum(x[c(TRUE,FALSE,TRUE,FALSE)])` equal?
+(d) What does `sum(x[x < 5])` equal?
+(e) Why `dim(x_mat2[1:2,1])` return `NULL` while `dim(x_mat2[1:2,1:2])` returns a dimension?
+
+
+
+### Problem 4: Lists
+
+(a) Using `my_list`, show three ways to write one command that gives the 3rd entry of variable `x` in data frame `myDf`
+(b) What class of object does the command `my_list[3]` return?
+(c) What class of object does the command `my_list[[3]]` return?
+(d) What class of object does the command `unlist(my_list)` return? Why are all the entries characters?
+
+
+### Question 5: Data frames 
+```{r}
+str(tweets$text)
+```
+
+(a) The data set `TrumpTweetData.csv` contains data collected on about 1500 Trump tweets. The variable `text` contains the text of the selected tweets. Would it make sense to convert the variable `text` to a factor variable or should we keep it a character variable? 
+(b) Use **two methods** (in base-R) to find the `text` of the 180th tweet in the Trump data.
+(c) What is the class of the `attributes` of the data frame `tweets`?
+
+

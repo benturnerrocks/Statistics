@@ -1,0 +1,97 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, eval = TRUE, 
+                      message = FALSE, warning = FALSE)
+#xaringanExtra::use_clipboard()
+```
+
+```{r packageCheck, include=TRUE}
+library(tidyverse)
+library(babynames)
+```
+
+
+## Problem 1
+
+```{r string chunk}
+got <- c("Arya", "Sansa", "Jon", "Bran", "Robb", "Rickon")
+```
+
+#### (a) Write a regular that finds all `got` names that start with an "R". Use `str_subset` to extract these names from the `got` vector. 
+
+```{r}
+pattern <-   # fill in your regular expression
+str_subset(str_to_lower(got), pattern)   # work with lower case names
+```
+
+
+#### (b) Write a regular that finds all `got` names with a second letter equal to "r". Use `str_subset` to extract these names from the `got` vector. 
+
+```{r}
+pattern <-   # fill in your regular expression
+str_subset(str_to_lower(got), pattern)   # work with lower case names
+```
+
+
+
+#### (c) Write a regular that finds all `got` names whose first OR last letters are vowels (a,e,i,o,u,y). Use `str_subset` to extract these names from the `got` vector. 
+
+```{r}
+pattern <-   # fill in your regular expression
+str_subset(str_to_lower(got), pattern)   # work with lower case names
+```
+
+
+
+#### (d) Write a regular that finds all `got` names whose first AND last letters are vowels (a,e,i,o,u,y). Use `str_subset` to extract these names from the `got` vector. 
+
+```{r}
+pattern <-   # fill in your regular expression
+str_subset(str_to_lower(got), pattern)   # work with lower case names
+```
+
+
+
+
+## Problem 2
+A Social Security number is an identifier that consists of 9 numbers and it can't start with the number 9. 
+```{r}
+x <- "my SSN 593-29-9402 and my age is 65"
+y <- "612-943-0539"
+z <- "my ssn number is 39502 9485."
+out <- c(x,y,z)
+out
+```
+
+#### (a) What characters in `x` will `str_view_all(x, "-..-")` find? Try to answer this before you run the code. (And remember that `str_view` only knits to html format.)
+
+
+
+#### (b) what pattern will `str_view_all(out, "-\\d{2}-")` find? Try to answer this before you run the code.
+
+
+
+#### (c) Use `str_view_all` to determine the correct regex pattern to identify all 9 digit SSN in `out`. Try to start with a simple pattern, make sure it works, then start building complexity. 
+
+```{r}
+ssn_pattern <-     # fill in your regular expression
+str_view_all(out, pattern)
+```
+
+
+#### (d)  Use the regex from (c) in `str_replace` to replace all SSNs with an `XXX-XX-XXXX` string to annonymize *only* the SSN numbers in `out`
+
+
+#### (e)  Does your regular expression from (c) work with numbers that look like SSN, but are longer than 9 digits? If your expression wrongly highlights these test numbers, then try modifying your regular expression using negative look behind and look ahead operators to make sure there are no extra digits beyond the 9 required digits. 
+```{r }
+test <- c("123-45-67890","1123 45 6789")
+str_view_all(test, ssn_pattern)
+```
+
+
+
+## Problem 3
+The regular expression `"^[Ss](.*)(t+)(.+)(t+)"` detects "scuttlebutt", "Stetson", and "Scattter", but not "Scatter." Why?
+```{r}
+x <- c("scuttlebutt", "Stetson", "Scattter", "Scatter")
+str_detect(x, "^[Ss](.*)(t+)(.+)(t+)")
+```

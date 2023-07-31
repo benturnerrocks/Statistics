@@ -1,0 +1,85 @@
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse=FALSE, 
+                      message = FALSE, warning = FALSE, 
+                      eval = TRUE, fig.align = 'center',
+                      fig.height = 4, fig.width = 6)
+xaringanExtra::use_clipboard()
+```
+
+
+```{r packageCheck, include=TRUE, eval = TRUE}
+library(ggplot2)
+library(dplyr)
+```
+
+
+## Historical baby name {.build}
+The package `babynames` contains the data set `babynames` in tibble form. This data set gives name rates for births recorded by the Social Security Administration. 
+
+- Over 1.9 million rows giving the names of all baby names born in any year
+```{r, eval = TRUE}
+#install.packages("babynames")
+data("babynames", package = "babynames")
+babynames  # tibble prints the first 10 rows, not the entire data frame
+```
+- Each row specifies a:
+    + `year`
+    + `sex` recorded as `F` or `M`
+    + `name`
+    + `n` number born with that name in a given year, by sex
+    + `prop` proportion with a given name, by sex and year. 
+    
+E.g. 7065 females named Mary were recorded in SSA applicants born in 1880, this makes up about 7.2% of all females applicants with 1880 birth dates.
+
+
+\newpage
+
+#### 1. What does this command do? 
+
+```{r}
+filter(babynames, name %in% c("Tillie","Tilly","Mathilda","Matilda"))
+```
+
+
+
+#### 2. What does this plot show?
+
+```{r}
+babynames %>% 
+  filter(name == "Tillie", sex == "F") %>% 
+  ggplot(aes(x = year)) + 
+  geom_line(aes(y = n, color = name)) +
+  scale_x_continuous(breaks = seq(1880, 2017, by=10))
+```
+
+
+
+#### 3. Use `n_distinct` to determine how many distinct years are in the data. What are the first and last years in the data?
+
+```{r}
+# for #3
+```
+
+
+#### 4. There are `r nrow(filter(babynames, name == "Tillie"))` years with at least one baby named Tillie. Maybe? Why might this conclusion be false? Show how you can check.
+
+```{r}
+filter(babynames, name == "Tillie")
+```
+
+
+
+#### 5. For female records, what name had the highest popularity in one year measured by the number of babies born with that name? Give the name and year. Repeat for males. 
+
+```{r}
+#  for #5
+```
+
+
+#### 6. Repeat 5, but measure popularity by the proportion of babies born with that name in a given year. Do the names and years differ?
+
+```{r}
+#  for #6
+```
+
+

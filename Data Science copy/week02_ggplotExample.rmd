@@ -1,0 +1,110 @@
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse=FALSE, 
+                      message = FALSE, warning = FALSE, 
+                      eval = FALSE)
+xaringanExtra::use_clipboard()
+```
+
+
+## Example 1: Calories in Food
+
+The number of calories in five foods is given in the data set below. 
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+calories <- tribble(
+  ~food, ~calories, ~bacon,
+  "French Fries", 607, FALSE,
+  "Potato chips", 542, FALSE,
+  "Bacon", 533, TRUE,
+  "Pizza", 296, FALSE,
+  "Chili Dog", 260, FALSE
+)
+```
+
+#### (a) Create a bar chart displaying the calories by food, coloring the bars by `bacon`:
+
+- use `col` geometry
+- use `fill` for the color aesthetic
+- add an informative title and labels
+
+
+```{r 1a solution}
+# Create the bar chart
+```
+
+#### (b) Reorder the bars by caloric content.
+
+We can use the `fct_inorder()` command to reorder the bars within our ggplot2 code since the rows are ordered. 
+
+```{r 1b solution}
+# Reorder the bars by calories
+```
+
+Other helpful functions for reordering factors for plotting include `fct_reorder()`, `fct_infreq()`, and `fct_rev()`. These functions are part of the `forcats` package which is loaded by the `tidyverse`.
+
+
+#### (c) Remove the axis labels, since they are redundant.
+
+One approach is to set their `labs()` to `NULL`:
+
+```{r 1c solution}
+# Set the x and y labels to NULL
+```
+
+Another approach is to set the appropriate element of the `theme()` to `element_blank()`:
+
+```{r 1c solution2}
+# Remove the element from the theme
+```
+
+
+
+#### (d) Remove the legend, since we are simply calling attention to bacon. (Hint: use a `theme` option.)
+
+We can edit the appearance of the legend using a variety of arguments within the `theme()` (see `?theme` for the full list). To remove the legend, we set `legend.position = "none"` (Other options for the  position include`"left"`, `"right"`, `"bottom"`, `"top"`, or a two-element numeric vector)
+
+```{r 1d solution}
+# Remove the legend
+```
+
+#### (e) Change the scale for fill color.
+
+The default fill colors are not ideal, especially since we are simply drawing attention to bacon. To change the scale, we appeal to a `scale_fill_<method>()` function. A few options include:
+
+- `scale_fill_brewer()`
+- `scale_fill_grey()`
+- `scale_fill_viridis_d()`
+- `scale_fill_manual()`
+
+
+With `scale_fill_manual()`, you can manually specify named colors for a factor in the order of the levels using the `values` argument:
+
+```{r 1e solution1}
+# Change the fill colors to "gray40" and "red2"
+```
+
+Look at the `palette` options in the `?scale_fill_brewer` help file. Which type of palette, diverging, qualitative, or sequential, is best for contrasting bacon with the other foods?
+
+```{r 1e solution2}
+# Change fill color to a brewer palette
+```
+
+What happens when you add `direction = -1` to the `brewer` layer in your previous plot?
+```{r e solution3}
+# Change previous plot to include direction = -1
+```
+
+Try using `scale_fill_viridis_d()` to change fill color. What is one reason for using this color palette? (check the help file!)
+
+```{r 1e solution4}
+# Change color to viridis
+```
+
+#### (f) Annotate the top of the bars with the actual calories value. 
+
+One way to add text values to each bar is with `geom_text()`. 
+
+```{r 1f solution}
+# Add text to directly label the bars
+```
+

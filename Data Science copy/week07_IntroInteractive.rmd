@@ -1,0 +1,479 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse=TRUE,  eval=TRUE, 
+                      message=F, include=T, error=TRUE,
+                      fig.height = 3, fig.width = 8, 
+                      dev = 'svg', 
+                      fig.align='center')
+```
+
+```{r packageCheck, include=FALSE}
+mypacks <- c("tidyverse","plotly", "shiny")  # what packages are needed?
+lapply(mypacks, library, character.only=TRUE)  # load all packages
+```
+
+## Interactive graphs {.build}
+
+- An interactive graph allows the user, or **client**, to change features of the graph
+- We will explore a couple options in R 
+
+## Using `plotly` {.build}
+
+- The R package `ployly` makes quick and easy interactive graphs 
+    + hovering, brushing, zooming, tracing
+- Can upload graphs to the web
+
+## Using `plotly`: quick example
+
+
+```{r echo=TRUE, fig.height = 4, fig.width = 9, fig.align='center'}
+tweets<- read.csv("http://math.carleton.edu/kstclair/data/TrumpTweetData.csv")
+w <- ggplot(data=drop_na(tweets, source), 
+            aes(x=nWords, y=nRealWords, color=source)) + geom_jitter() 
+ggplotly(w) 
+```
+
+## Using `plotly`: quick example
+
+```{r, echo=FALSE}
+mca <- data.frame(percent = c(24.5, 33.7, 19.4, 22.4, 27.6, 32.1, 20.2, 20.2, 26.0, 33.7, 20.1, 20.1), meets = factor(rep(c("Exceeds", "Meets", "Partially Meets", "Does not Meet"), 3), levels=c( "Exceeds","Meets","Partially Meets","Does not Meet")), year = rep(c("2015","2016","2017"), each=4))
+mybar <- ggplot(mca, aes(x=year, y=percent, fill=meets)) + 
+  labs(title="11th grade math MCA scores") +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme(legend.position = "bottom")+ 
+  scale_fill_viridis_d()
+ggplotly(mybar) 
+```
+
+##  Shiny graphs {.build}
+
+- Shiny is an R package that provides a fairly high-level framework for creating interactive graphics
+    
+- All Shiny graphics/apps need to have a Rstudio computer/server running
+  - shinyapps.io: hosts apps online
+
+
+## Shiny Example
+
+```{r, echo = FALSE}
+ui <- fluidPage(
+  numericInput(inputId = "num_bins", 
+               label = "Number of histogram bins",
+               value = 20, 
+               min = 3, max = 50, step = 1),
+  plotOutput(outputId = "hist", height = "300px")
+)
+server <- function(input, output){
+  output$hist <- renderPlot({
+    ggplot(midwest, aes(x = percollege  )) + 
+      geom_histogram(bins = input$num_bins) +
+      labs(title = "Percent of population with a college degree",
+      subtitle = "Midwest counties")
+  })
+}
+shinyApp(ui, server)
+```
+
+
+## Creating Shiny graphs {.build}
+
+- Can embed a shiny plot in Markdown HTML docs
+    + Need to add `runtime: shiny` to your YAML header
+    
+- Can create an `app.R` file with a `ui` and `server` function
+
+- one place to start is with Rstudio templates
+  - New Files >  R Markdown > Shiny
+  - New Files > Shiny Web App
+
+
+
+## Shiny vs. `plotly` examples
+
+- Shiny graph need to be "connected" to Rstudio or a remote Rstudio server
+    + E.g. histogram heights need to be recalculated when you change # of bins!
+    + this is why your html "disappears" when you close Rstudio
+- The `plotly` graph just needs the data to ID points (no stats to calculate)
+
+
+## Basic Shiny app structure
+
+```{r, eval = FALSE}
+ui <- fluidPage(
+  <inputs>,
+  <outputs>
+)
+server <- function(input, output){
+  <reactive and render>
+}
+shinyApp(ui, server)
+```
+
+- `<inputs>`: things the user interacts with
+  - provides an `input` value to the `server` function
+  
+- `<render>`: renders something (plot, table, etc) that changes as the `input` changes
+  - provides an `output` value to the `outputs` `ui`
+  
+- `<output>`: displays the rendered object
+
+
+## [Shiny Cheatsheet](https://data-science-stat-220-s22.github.io/course-content-s22/cheatsheets/shiny.pdf)
+
+```{r , echo = FALSE, out.width="100%"}
+knitr::include_graphics("images/shiny_cheatsheet.png")
+```
+
+
+
+
+## Input  {.build}
+
+```{r , echo = FALSE, out.width="50%"}
+knitr::include_graphics("images/shiny_inputs.png")
+```
+
+
+## Input  {.build}
+
+**Action:** we want to control the *numeric* bin width value in the histogram
+
+
+One option: `numericInput`
+
+
+```{r, eval = FALSE}
+numericInput(
+  inputId,
+  label,
+  value,
+  min = NA,
+  max = NA,
+  step = NA,
+  width = NULL
+)
+```
+
+## Example: Input
+
+```{r, echo = TRUE, eval = TRUE}
+ui <- fluidPage(
+### <b>
+  numericInput(inputId = "num_bins", 
+               label = "Number of histogram bins",
+               value = 20, 
+               min = 3, max = 50, step = 1)
+### </b>
+)
+server <- function(input, output){}
+shinyApp(ui, server)
+```
+
+## Render + Output  {.build}
+
+```{r , echo = FALSE, out.width="60%"}
+knitr::include_graphics("images/shiny_outputs.png")
+```
+
+## Render  {.build}
+
+```{r , echo = FALSE, out.width="60%"}
+knitr::include_graphics("images/shiny_renderPlot.png")
+```
+
+## Render  {.build}
+
+**Render** a **plot** of histogram of percent college for midwest counties
+
+The option: `renderPlot`
+
+- must assign to `output$outputID` 
+
+
+```{r, eval = FALSE}
+output$myplot <- renderPlot(
+  expr,   # put graph code in {}
+  width = "auto",  # or pixel value
+  height = "auto"
+)
+```
+
+
+## Example: Render  {.build}
+
+```{r, echo = TRUE, eval = TRUE}
+ui <- fluidPage()
+server <- function(input, output){
+### <b>
+  output$hist <- renderPlot({
+    ggplot(midwest, aes(x = percollege)) + 
+      geom_histogram(bins = 20) +
+      labs(title = "Percent of population with a college degree",
+      subtitle = "Midwest counties")
+  })
+### </b>
+}
+shinyApp(ui, server)
+```
+
+Nothing displayed yet!
+
+## Output  {.build}
+
+```{r , echo = FALSE, out.width="60%"}
+knitr::include_graphics("images/shiny_plotOutput.png")
+```
+
+
+## Output  {.build}
+
+**Output** a rendered **plot** in the **ui**
+
+The option: `renderPlot` objects are outputted in `plotOutput`
+
+- takes in an `output` name
+
+
+```{r, eval = FALSE}
+plotOutput(
+  outputId,
+  width = "100%",
+  height = "400px",
+  click = NULL,
+  dblclick = NULL,
+  hover = NULL,
+  brush = NULL,
+  inline = FALSE
+)
+```
+
+
+## Example: Output
+
+```{r, echo = TRUE, eval = FALSE}
+ui <- fluidPage(
+### <b>
+    plotOutput(outputId = "hist", height = "300px")
+### </b>
+)
+server <- function(input, output){
+  output$hist <- renderPlot({
+    ggplot(midwest, aes(x = percollege)) + 
+      geom_histogram(bins = 20) +
+      labs(title = "Percent of population with a college degree",
+      subtitle = "Midwest counties")
+  })
+}
+shinyApp(ui, server)
+```
+
+
+## Example: Output
+
+Nothing interactive yet!
+```{r, echo = FALSE, eval = TRUE}
+ui <- fluidPage(
+### <b>
+    plotOutput(outputId = "hist", height = "300px")
+### </b>
+)
+server <- function(input, output){
+  output$hist <- renderPlot({
+    ggplot(midwest, aes(x = percollege)) + 
+      geom_histogram(bins = 20) +
+      labs(title = "Percent of population with a college degree",
+      subtitle = "Midwest counties")
+  })
+}
+shinyApp(ui, server)
+```
+
+Need to feed `input$num_bins` into the `bins` argument of `geom_histogram`!
+
+## Example: putting it all together 
+
+```{r, echo = TRUE, eval = FALSE}
+ui <- fluidPage(
+### <b>
+  numericInput(inputId = "num_bins", 
+               label = "Number of histogram bins",
+               value = 20, 
+               min = 3, max = 50, step = 1),  # comma between inputs
+### </b>
+  plotOutput(outputId = "hist", height = "300px")
+)
+server <- function(input, output){
+  output$hist <- renderPlot({
+    ggplot(midwest, aes(x = percollege  )) + 
+### <b>
+      geom_histogram(bins = input$num_bins) +
+### </b>
+      labs(title = "Percent of population with a college degree",
+      subtitle = "Midwest counties")
+  })
+}
+shinyApp(ui, server)
+```
+
+
+## Example: putting it all together  
+
+```{r, echo = FALSE}
+ui <- fluidPage(
+### <b>
+  numericInput(inputId = "num_bins", 
+               label = "Number of histogram bins",
+               value = 20, 
+               min = 3, max = 50, step = 1),  # comma between inputs
+### </b>
+  plotOutput(outputId = "hist", height = "300px")
+)
+server <- function(input, output){
+  output$hist <- renderPlot({
+    ggplot(midwest, aes(x = percollege  )) + 
+      geom_histogram(bins = input$num_bins) +
+      labs(title = "Percent of population with a college degree",
+      subtitle = "Midwest counties")
+  })
+}
+shinyApp(ui, server)
+```
+
+
+
+## Layout options  {.build}
+
+```{r , echo = FALSE, out.width="50%"}
+knitr::include_graphics("images/shiny_layout.png")
+```
+
+
+## Layout options  {.build}
+
+The **ui** is built with HTML
+
+R layout function option: `sidebarLayout`
+
+
+```{r, eval = FALSE}
+sidebarLayout(
+  sidebarPanel,
+  mainPanel,
+  position = c("left", "right"),
+  fluid = TRUE
+)
+```
+
+
+## Example: sidebarLayout 
+
+
+```{r, echo = TRUE, eval = TRUE}
+ui <- fluidPage(
+    titlePanel("My awesome graph"),
+### <b>
+    sidebarLayout(
+        sidebarPanel(
+### </b>
+            numericInput(inputId = "num_bins", 
+               label = "Number of histogram bins",
+               value = 20, 
+               min = 3, max = 50, step = 1)
+          ),  # comma between panels
+### <b>
+        mainPanel(
+### </b>
+           plotOutput(outputId = "hist", height = "300px")
+        )  #end mainPanel
+    )  # end sidebarLayout
+)
+```
+
+
+
+## Example: sidebarLayout 
+
+```{r, echo = FALSE}
+server <- function(input, output){
+  output$hist <- renderPlot({
+    ggplot(midwest, aes(x = percollege  )) + 
+      geom_histogram(bins = input$num_bins) +
+      labs(title = "Percent of population with a college degree",
+      subtitle = "Midwest counties")
+  })
+}
+shinyApp(ui, server)
+```
+
+
+## Input using data variables {.build}
+
+**Action:** we want to control the *variable* used in a graph
+
+
+One option: `varSelectInput`
+
+- `data` is a data frame that variable names are retrieved from
+
+
+```{r, eval = FALSE}
+varSelectInput(
+  inputId,
+  label,
+  data,
+  selected = NULL
+)
+```
+
+## Example: Input using data variables
+
+```{r, echo = TRUE, eval = TRUE}
+ui <- fluidPage(
+    titlePanel("My awesome graph"),
+    sidebarLayout(
+        sidebarPanel(
+            numericInput(inputId = "num_bins", 
+               label = "Number of histogram bins",
+               value = 20, 
+               min = 3, max = 50, step = 1), 
+### <b>
+            varSelectInput(inputId = "var",
+                label = "pick a variable",
+                data = select(midwest, starts_with("perc")))
+          ),  # comma between panels
+### </b>
+        mainPanel(
+           plotOutput(outputId = "hist", height = "300px")
+        )  #end mainPanel
+    )  # end sidebarLayout
+)
+```
+
+
+## Rendering using data variables {.build}
+
+
+**Render** a **plot** of using the input from `varSelectInput`
+
+In `renderPlot` code, you must use `!!input$var` ("bang bang") to tell R that `input$var` is a variable in the data being accessed
+
+
+
+```{r, echo = TRUE}
+server <- function(input, output){
+  output$hist <- renderPlot({
+### <b>
+    ggplot(midwest, aes(x = !!input$var)) + 
+### </b>
+      geom_histogram(bins = input$num_bins) +
+      labs(title = "Midwest county populations")
+  })
+}
+```
+
+
+## Example: Rendering using data variables
+
+
+```{r, echo = TRUE}
+shinyApp(ui, server)
+```

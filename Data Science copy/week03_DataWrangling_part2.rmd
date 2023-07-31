@@ -1,0 +1,67 @@
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse=FALSE, 
+                      message = FALSE, warning = FALSE, 
+                      eval = FALSE, fig.align = 'center', 
+                      fig.height = 4, fig.width = 6)
+xaringanExtra::use_clipboard()
+```
+
+
+```{r packageCheck}
+library(ggplot2)
+library(dplyr)
+```
+
+
+## Historical baby name
+```{r}
+data("babynames", package = "babynames")
+babynames  # tibble prints the first 10 rows, not the entire data frame
+```
+- Each row specifies a:
+    + `year`
+    + `sex` recorded as `F` or `M`
+    + `name`
+    + `n` number born with that name in a given year, by sex
+    + `prop` proportion with a given name, by sex and year. 
+    
+
+## Data wrangling part 1 continued...
+
+
+
+
+#### 7. What does this plot show?
+
+```{r}
+babynames %>% 
+  filter(sex == "F") %>% 
+  count(year, name = "year_n") %>%
+  ggplot(aes(x=year, y = year_n)) + 
+  geom_line() +
+  scale_x_continuous(breaks = seq(1880, 2017, by=10))
+```
+
+
+
+### 8. Write the following set of commands using one piped command. 
+
+```{r}
+tillies <- filter(babynames, name=="Tillie")
+summarize(group_by(tillies, sex), tillie_mean = mean(n), tillie_sd = sd(n), n_years = n())
+```
+
+
+
+```{r}
+#  for #8
+```
+
+### 9. Interpret the summaries given in 8.
+
+### 10. Which year did not have any babies named Tillie for female births?
+
+
+```{r}
+#  for #10
+```

@@ -1,0 +1,52 @@
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, collapse=FALSE, 
+                      message = FALSE, warning = FALSE, 
+                      eval = TRUE, 
+                      fig.height = 4, fig.width = 6)
+xaringanExtra::use_clipboard()
+```
+
+
+
+
+## Example 1: American Community Survey maps
+In today's class we created cloropleth maps of states in the US based on ACS data. 
+```{r}
+library(ggplot2)
+states <- map_data("state")
+ACS <- read.csv("http://math.carleton.edu/kstclair/data/ACS2016.csv")
+ACS <- dplyr::filter(ACS, !(region  %in% c("Alaska", "Hawaii"))) # only 48+D.C.
+ACS$region <- tolower(ACS$region)  # lower case (match states regions)
+```
+
+
+### (a) Mapping median income
+
+Create a cloropleth plot that uses color to create a `MedianIncome`  map of the US.
+```{r 2a solution}
+# map median income
+```
+
+### (b) Mapping deviations from national median income
+
+The median income in the US in 2016 was estimated to be $27,000. Redraw your map in (a) to visualize each state's deviation from national median income. 
+
+```{r 2b solution}
+# compare state income to national income
+```
+
+### (c) Changing numerically scaled color
+
+You should use a *diverging* color for (b) to highlight larger deviations from the national median. Add `scale_fill_distiller` to the map from (b) and select a diverging palette.   
+
+```{r 2c solution}
+# change to a diverging color
+```
+
+### (d) Fixing a midpoint on a diverging scale
+
+Use `scale_fill_gradient2` to fix a midpoint scale value at a white color, with diverging colors for larger positive and negative values. Apply this color to your map in (b) and fix the `midpoint` at an appropriate value. 
+
+```{r 2d solution}
+# change to a gradient fill color
+```

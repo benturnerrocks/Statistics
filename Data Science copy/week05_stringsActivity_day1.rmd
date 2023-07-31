@@ -1,0 +1,167 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, eval = TRUE, 
+                      message = FALSE, warning = FALSE)
+#xaringanExtra::use_clipboard()
+```
+
+```{r packageCheck, include=TRUE}
+library(tidyverse)
+myclass <- "Math 285"
+feelings <- c("fun", "early")
+my_sentence <- str_c(myclass, "is", feeling, sep = " ")
+```
+
+
+## Problem 1 Combining
+
+#### (a) 
+What happens when a `str_c` entry is a vector? Run the following code to answer:
+```{r}
+my_sentences <- str_c(myclass, "is", feelings, sep = " ")
+my_sentences
+```
+
+
+#### (b) 
+What does `str_flatten` do?
+```{r}
+str_flatten(my_sentences, collapse = " and ")
+```
+
+#### (c) 
+How to write "Math 285 is fun and early" using `str_c`?
+
+
+
+
+## Problem 2 Special characters
+
+What will using a `\n` separator do in the command below? 
+
+```{r}
+p2 <- str_c(myclass, "is", feeling, sep = "\n")
+p2
+writeLines(p2)
+```
+
+
+
+
+## Problem 3 Length
+Does `str_length` count spaces and special characters??
+
+```{r q3}
+p2
+str_length(p2)
+```
+
+
+
+## Problem 4 Extracting
+
+#### (a)
+What happens with negative positions? 
+
+```{r}
+str_sub(my_sentence, start = -3, end = -1)
+```
+
+#### (b)
+With a vector of positions? 
+
+```{r}
+str_sub(my_sentence, start = c(1, 6), end = c(4, 8))
+```
+
+#### (c)
+Only a start value?
+
+```{r}
+str_sub(my_sentence, start = -3)
+```
+
+
+
+
+## Problem 5 Replace
+
+#### (a)
+What does the `str_replace_all` command below do?  
+```{r}
+str_replace_all(my_sentence, pattern = " ", replacement = "")
+```
+
+#### (b)
+What will `str_length` of the string in (a) measure?
+
+
+
+## Problem 6 Splitting
+What happens with `str_split` when `simplify = TRUE` is added?
+
+```{r}
+str_split(my_sentences, " ")
+str_split(my_sentences, " ", simplify = TRUE) 
+```
+
+
+
+## Problem 7 Splitting
+What happens with `str_split_fixed` if we let `n=3` or `n=5`?
+
+```{r }
+str_split_fixed(my_sentences, " ", n = 3) 
+str_split_fixed(my_sentences, " ", n = 5)  
+```
+
+
+
+
+## Problem 8: `stringr` with data
+
+Let's use the tools in `stringr` for some data analysis using our favorite `babynames` data. 
+```{r}
+library(babynames)
+```
+
+
+#### (a)
+
+Use `str_sub` to create a new column in `babynames` called `last` that contains the last letter of every name. (Hint: see 4(a) above.)
+```{r}
+# check with a test name:
+str_sub("Arnab", <fill in>)
+```
+
+```{r}
+# then use to add a new variable
+babynames <- babynames %>%
+  mutate(last = str_sub(name, <fill in>))
+```
+
+#### (b)
+
+Use your `last` variable created in (a) compute the proportion of names in 2017 that ended in a vowel for each sex. 
+
+suggested way:
+- make a logical variable called `vowel` that indicates whether the last letter is one of "a", "e", "i", "o", "u", or "y". (Hint: use   `%in%`) 
+- filter and group, then use `vowel` to compute the count and proportion of vowel ending names by sex in 2017
+
+
+
+#### (c)
+
+Use `str_detect()` and other tidyverse tools to determine how many baby names in 2017 contain the string "ono" for each sex (ignoring capitalization).
+
+
+
+#### (d)
+
+Use `str_subset()` to extract all of the baby names in 2017 that contain "ono" (regardless of sex). Then determine which names, if any, occurred in both sexes (hint: try `duplicated`).  One way to get started is to pull all babynames in 2017 into a character vector:
+
+```{r}
+names_2017 <- babynames %>%
+  filter(year == 2017) %>%
+  mutate(name = str_to_lower(name)) %>%
+  pull(name) 
+```
