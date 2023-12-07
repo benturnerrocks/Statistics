@@ -1,0 +1,137 @@
+---
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(stringr)
+library(purrr)
+library(dplyr)
+library(caret)
+library(randomForest)
+library(stringr)
+```
+
+```{r}
+# Read in data
+masterDF <- read_csv("merged_data.csv")
+```
+
+```{r}
+# Number of NAs in imdb vs tmdb
+sum(is.na(masterDF$imdb_score))
+sum(is.na(masterDF$tmdb_score))
+
+# Check percentages of imdb scores to determine great movies
+quantile(masterDF$imdb_score, probs = seq(0, 1, 0.1), na.rm=T)
+```
+
+```{r}
+# Make a classifier variable (is movie/show in top 15%?)
+masterDF_ml <- masterDF %>%
+  mutate(is_great = as.factor(imdb_score>(quantile(imdb_score, .85, na.rm=T))))
+```
+
+```{r}
+# Create cross validation with 5 folds for train control
+train_control <- trainControl(
+  method = "cv", # cross-validation
+  number = 5, # 5-folds
+)
+# Create mtry value of 2 (check 2 variables per node)
+mtry_grid <- data.frame(mtry = 2)
+
+# Drop all na values from classification column (is_great)
+masterDF_ml_noNA <- masterDF_ml %>%
+  drop_na(is_great)
+```
+
+```{r}
+# MOVIE prediction
+masterDF_ml_tv <- masterDF_ml_noNA %>%
+  filter(type=="MOVIE")
+set.seed(4423423)
+# Create index for training data
+sample_index <- sample(x=nrow(masterDF_ml_tv), 
+               size=.8*nrow(masterDF_ml_tv))
+
+train_movie <- masterDF_ml_tv %>% slice(sample_index) # train
+test_movie <- masterDF_ml_tv %>% slice(-sample_index) # test
+```
+
+```{r}
+# Random forest model creation using training data
+cinema_rforest_movie <- randomForest(formula = is_great ~ streaming_service +
+               release_year + runtime + name,
+             data = train_movie,
+             ntree = 20, # number of trees (much less than 500)
+             mtry = 2 # number of predictors to select
+)
+```
+
+```{r}
+x <- nrow(test_movie) # get number of rows for test data
+
+# Add probability of being a great movie to data frame
+test_w_pred_movie <- test_movie %>%
+  mutate(prob = as.double(predict(cinema_rforest_movie, newdata=test_movie, type="prob")[1:x]))
+
+# Function to test different thresholds
+eval_thresh_fun <- function(t, test) {
+  test %>%
+    mutate(prediction = ifelse(prob < t, TRUE, FALSE)) %>%
+    summarize(threshold=t, accuracy = mean(is_great == prediction),
+              precision = sum(is_great == TRUE &
+                                prediction == TRUE)/sum(prediction == TRUE),
+              sensitivity = sum(is_great == TRUE &
+                                  prediction == TRUE)/sum(is_great == TRUE),
+              specificity = sum(is_great == FALSE &
+                                  prediction == FALSE)/sum(is_great == FALSE))
+}
+
+t_vals <- seq(0.1, 0.9, by=0.05) # thresholds to test
+eval_df <- map_df(t_vals, eval_thresh_fun, test=test_w_pred_movie) # map to all
+
+# pivot longer in order to plot
+eval_df_longer <- eval_df %>%
+  pivot_longer(
+    cols=2:5,
+    names_to= "metric",
+    values_to= "value"
+  )
+```
+
+```{r}
+# plot the threshold comparison with metrics
+ggplot(eval_df_longer, aes(x=threshold, y=value, color=metric)) +
+  geom_line()
+```
+
+```{r}
+# Finalize threshold (after looking at plot)
+thresh <- .67
+
+# Add predictions based on probabilities with respect to threshold
+test_w_pred_movie <- test_w_pred_movie %>%
+    mutate(prediction = ifelse(prob < thresh, TRUE, FALSE))
+```
+
+```{r}
+x <- nrow(test_movie) # get number of rows for test data
+confm_test_movie <- confusionMatrix(
+  data = as.factor(test_w_pred_movie$prediction)[1:x], # change prediction to factor
+  reference = as.factor(test_w_pred_movie$is_great),
+  positive="TRUE")
+
+# Check metrics
+confm_test_movie$byClass
+confm_test_movie
+
+importance(cinema_rforest_movie) # most important factors
+```
+
+```{r}
+# Save
+saveRDS(cinema_rforest_movie, "rforest_model_movie") # save model to directory
+```
+
